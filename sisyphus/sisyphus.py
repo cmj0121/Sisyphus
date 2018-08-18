@@ -5,12 +5,14 @@ import time
 import logging
 import setproctitle # pylint: disable=import-error
 from multiprocessing import Process
+import subprocess
+import sys
 
 
 class Sisyphus(object):
     _jobs_ = {}
 
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, monitor_freq=1):
         fmt = '[%(asctime)-.19s] (%(filename)s#%(lineno)04d) - %(message)s'
         fmt = logging.Formatter(fmt)
 
@@ -26,6 +28,10 @@ class Sisyphus(object):
 
         for attr in 'critical error warning info debug'.split():
             setattr(self, attr, getattr(logger, attr))
+
+        Sisyphus.remove('_monitor')
+        if monitor_freq != 0:
+            self._register_monitor(monitor_freq)
 
     def __call__(self, frequency=5):
         jobs = {}
@@ -50,6 +56,24 @@ class Sisyphus(object):
             self._jobs_[name]['fn']()
             time.sleep(self._jobs_[name]['frequency'])
 
+    def _register_monitor(self, frequency=1):
+        def my_monitor():
+            ps_pipe = subprocess.Popen(['ps', 'a'], stdout=subprocess.PIPE)
+            stdout, stderr = ps_pipe.communicate()
+            if stderr:
+                print(f'error: {stderr}')
+                return
+
+            cmd_lines = [' '.join(_.split()[4:]) for _ in stdout.decode('ascii').split('\n')[1:]]
+            for name, v in Sisyphus._jobs_.items():
+                process_name = f'{name} ({v["frequency"]})'
+                if name == '_monitor':
+                    continue
+                if any([process_name == _ for _ in cmd_lines]):
+                    print(f"m (Running): '{process_name}'")
+
+        self._jobs_['_monitor'] = {'fn': my_monitor, 'frequency': frequency}
+
     @property
     def jobs(self):
         jobs = [f'- {job} ({item["fn"]})' for job, item in self._jobs_.items()]
@@ -66,11 +90,23 @@ class Sisyphus(object):
             return func
         return wrapper
 
+    @classmethod
+    def remove(cls, name):
+        if name not in cls._jobs_:
+            return
+        del cls._jobs_[name]
 
 if __name__ == '__main__':
     @Sisyphus.register(1)
     def echo():
         print('echo ...')
+        time.sleep(3)
+
+    @Sisyphus.register(2)
+    def echo2():
+        print('echo 2')
+        time.sleep(1)
+        sys.exit(0)
 
     sisyphus = Sisyphus()
     sisyphus()
