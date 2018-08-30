@@ -11,6 +11,9 @@ setup(
     author_email='cmj.tw',
     packages=find_packages(),
     install_requires=['setproctitle', 'zmq', 'procname'],
+    extras_require={
+        'dev': ['pytest-mock']
+    },
     entry_points={
         'console_scripts': 'sisyphus = sisyphus.__main__:cli.run',
     },

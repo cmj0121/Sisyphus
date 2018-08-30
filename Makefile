@@ -22,7 +22,7 @@ publish:
 .PHONY: install uninstall clean
 
 install: $(PIP) uninstall
-	pip install $<
+	pip install $< -e .[dev]
 
 uninstall:
 	@[ -z "`pip list | grep $(PROJECT)`" ] || pip uninstall -y $(PROJECT)

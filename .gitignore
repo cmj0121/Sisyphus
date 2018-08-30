@@ -8,3 +8,4 @@ Pipfile.lock
 *.tgz
 
 .pytest_cache/
+pysisyphus.egg-info/
