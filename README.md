@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/pysisyphus/Sisyphus.svg?branch=master)](https://travis-ci.com/pysisyphus/Sisyphus)
+
 # Sisyphus #
 Simple python-based worker framework
 
