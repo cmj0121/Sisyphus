@@ -71,12 +71,21 @@ class Sisyphus(object):
                 self._jobs_[name]['counter'].value -= 1
 
             self._jobs_[name]['fn'].__globals__['worker'] = self
-            self._jobs_[name]['fn']()
+            self._jobs_[name]['executed'].value = True
+            try:
+                self._jobs_[name]['fn']()
+            finally:
+                self._jobs_[name]['executed'].value = False
             time.sleep(self._jobs_[name]['frequency'])
 
     def load_config(self, filepath=None):
         self.info(f'Loading configuration {filepath} ...')
         raise NotImplementedError
+
+    @property
+    def get_executes_jobs(self):
+        return [f'{job} ({item["fn"]})' for job, item in self._jobs_.items()
+                if item['executed'].value]
 
     @property
     def jobs(self):
@@ -93,6 +102,7 @@ class Sisyphus(object):
                 'fn': func,
                 'frequency': frequency,
                 'counter': Value('i', counter), # Global variable for the multi-processes
+                'executed': Value('i', False)
             }
 
             return func
