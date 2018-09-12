@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 #! coding: utf-8
-# Copyright (C) 2017-2018 cmj<cmj@cmj.tw>. All right reserved.
+# Copyright (C) 2017-2018 jaypan<sfffaaa@gmail.com>. All right reserved.
 
-import pytest
+import pytest # pylint: disable=unused-import
 import time
 from sisyphus.sisyphus import Sisyphus
 from multiprocessing import Process
@@ -15,11 +15,11 @@ def check_monitor_task(executed_jobs, check_data):
 def test_monitor_task():
 
     @Sisyphus.register(0, 1)
-    def my_sleep_01():
+    def my_sleep_01(): # pylint: disable=unused-variable
         time.sleep(5)
 
     @Sisyphus.register(0, 1)
-    def my_sleep_02():
+    def my_sleep_02(): # pylint: disable=unused-variable
         time.sleep(10)
 
     sisyphus = Sisyphus()
